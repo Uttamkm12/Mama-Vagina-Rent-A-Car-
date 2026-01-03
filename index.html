@@ -3,99 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rent-a-Car Manager</title>
+    <title>Mama Vagina Rent-A-Car</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 15px; color: #333; }
-        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .stats { display: flex; justify-content: space-between; }
-        .stat-box { text-align: center; flex: 1; }
-        .income { color: #27ae60; font-size: 20px; font-weight: bold; }
-        .outgoing { color: #e74c3c; font-size: 20px; font-weight: bold; }
-        h3 { margin: 0 0 10px 0; font-size: 16px; color: #7f8c8d; }
-        .btn { background: #0088cc; color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
-        .btn:disabled { background: #ccc; }
-        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .transaction-list { font-size: 14px; border-top: 1px solid #eee; padding-top: 10px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f3; margin: 0; padding: 15px; }
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        .btn { background: #0088cc; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        .status { text-align: center; color: green; font-weight: bold; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h3>মোট হিসাব (Profit/Loss)</h3>
-        <div class="stats">
-            <div class="stat-box">
-                <h3>Income</h3>
-                <div class="income">৳ <span id="totalIncome">0</span></div>
-            </div>
-            <div class="stat-box">
-                <h3>Outgoing</h3>
-                <div class="outgoing">৳ <span id="totalOutgoing">0</span></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>নতুন এন্ট্রি যোগ করুন</h3>
+        <h3>💰 আয়-ব্যয়ের হিসাব</h3>
         <select id="type">
-            <option value="income">Income (ভাড়া পাওয়া গেছে)</option>
-            <option value="outgoing">Outgoing (খরচ হয়েছে)</option>
+            <option value="Income">আয় (ভাড়া পাওয়া গেছে)</option>
+            <option value="Expense">ব্যয় (খরচ হয়েছে)</option>
         </select>
-        <input type="number" id="amount" placeholder="টাকার পরিমাণ (Amount)">
+        <input type="number" id="amount" placeholder="টাকার পরিমাণ (৳)">
         <input type="text" id="note" placeholder="বিস্তারিত (যেমন: তেলের খরচ)">
-        <button class="btn" id="saveBtn" onclick="saveData()">Save Entry</button>
-    </div>
-
-    <div class="card">
-        <h3>সাম্প্রতিক লেনদেন</h3>
-        <div id="history" class="transaction-list">কোন ডাটা নেই।</div>
+        <button class="btn" id="saveBtn" onclick="saveData()">সেভ করুন</button>
+        <div id="statusMsg" class="status">সফলভাবে সেভ হয়েছে! ✅</div>
     </div>
 
     <script>
-        // আপনার গুগল স্ক্রিপ্ট লিঙ্কটি নিচের সিঙ্গেল কোটেশনের ভেতর দিন
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzOVlsr3wfydx3XeBWg-dz3PwQOgoY_jYyk6Y2FYEYYc3BCZa-pLxRKxpGuRuhLI3r2/exec';
 
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-
         function saveData() {
-            const type = document.getElementById('type').value;
-            const amount = document.getElementById('amount').value;
-            const note = document.getElementById('note').value;
             const btn = document.getElementById('saveBtn');
+            const msg = document.getElementById('statusMsg');
+            const data = {
+                type: document.getElementById('type').value,
+                amount: document.getElementById('amount').value,
+                note: document.getElementById('note').value
+            };
 
-            if(!amount || amount <= 0) { 
-                alert("সঠিক পরিমাণ দিন"); 
-                return; 
-            }
+            if(!data.amount) { alert("পরিমাণ লিখুন!"); return; }
 
             btn.disabled = true;
-            btn.innerText = "Saving...";
+            btn.innerText = "সেভ হচ্ছে...";
 
-            // গুগল শিটে ডাটা পাঠানোর আসল অংশ
+            // সহজ পদ্ধতিতে গুগল শিটে পাঠানো
             fetch(scriptURL, {
                 method: 'POST',
-                mode: 'no-cors', // এটি গুরুত্বপূর্ণ CORS সমস্যা এড়াতে
+                mode: 'no-cors',
                 cache: 'no-cache',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: type,
-                    amount: amount,
-                    note: note
-                })
-            })
-            .then(() => {
-                alert("ডাটা গুগল শিটে সেভ হয়েছে!");
+                body: JSON.stringify(data)
+            }).then(() => {
+                msg.style.display = 'block';
                 document.getElementById('amount').value = '';
                 document.getElementById('note').value = '';
                 btn.disabled = false;
-                btn.innerText = "Save Entry";
-            })
-            .catch(error => {
-                console.error('Error!', error.message);
+                btn.innerText = "সেভ করুন";
+                setTimeout(() => { msg.style.display = 'none'; }, 3000);
+            }).catch(err => {
                 alert("ভুল হয়েছে! আবার চেষ্টা করুন।");
                 btn.disabled = false;
-                btn.innerText = "Save Entry";
             });
         }
     </script>
