@@ -3,190 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mama Vagina Rent-A-Car Advance Manager</title>
+    <title>Mama Vagina Rent-A-Car</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; margin: 0; padding: 15px; text-align: center; }
-        .header { font-size: 28px; font-weight: bold; margin-bottom: 5px; }
-        .sub-header { color: #e91e63; font-size: 14px; text-align: left; font-weight: bold; margin-bottom: 10px; }
-        
-        /* Schedule Container */
-        .schedule-container { margin-bottom: 100px; }
-        .booking-row {
-            color: white; display: flex; justify-content: space-around; 
-            padding: 10px 5px; margin-bottom: 5px; border-radius: 4px; font-size: 11px; font-weight: bold;
-        }
-        .bg-red { background: #ff0000; } /* বুকড */
-        .bg-green { background: #27ae60; } /* পেইড/সবুজ */
-        
-        /* Bottom Navigation */
-        .footer-btns { position: fixed; bottom: 20px; left: 0; width: 100%; display: flex; justify-content: space-around; }
-        .nav-btn { background: #4dfd82; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 16px; color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-
-        /* Form Styling */
-        #add-form-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; padding: 20px; box-sizing: border-box; z-index: 1000; overflow-y: auto; }
-        .form-group { text-align: left; margin-bottom: 12px; }
-        label { font-weight: bold; font-size: 14px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; margin-top: 5px; }
-        .time-picker { display: flex; gap: 5px; }
-        .save-btn { background: #0088cc; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 18px; margin-top: 10px; cursor: pointer; }
-        .close-btn { background: #666; }
+        body { font-family: Arial, sans-serif; background: #fff; margin: 0; padding: 10px; text-align: center; }
+        .header { font-size: 26px; font-weight: bold; margin-bottom: 10px; }
+        .booking-row { color: white; display: flex; justify-content: space-around; padding: 10px; margin-bottom: 5px; border-radius: 5px; font-size: 11px; font-weight: bold; }
+        .bg-red { background: #ff0000; } 
+        .bg-green { background: #27ae60; }
+        .nav-btn { background: #4dfd82; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; font-size: 14px; color: #fff; cursor: pointer; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; padding: 20px; box-sizing: border-box; overflow-y: auto; text-align: left; z-index: 10; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        .save-btn { background: #0088cc; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
-
     <div class="header">মামা ভাগিনা রেন্ট এ কার</div>
-    <div class="sub-header">বুকড শিডিউল</div>
+    <div id="scheduleList"><p>লোড হচ্ছে...</p></div>
 
-    <div class="schedule-container" id="scheduleList">
-        <p>লোড হচ্ছে...</p>
+    <div style="position:fixed; bottom:20px; width:100%; display:flex; justify-content:space-around; left:0;">
+        <button class="nav-btn" onclick="showForm('finance-form')">আয় ও ব্যয়</button>
+        <button class="nav-btn" onclick="showForm('schedule-form')">সিডিউল এড</button>
     </div>
 
-    <div class="footer-btns">
-        <button class="nav-btn">আয় ও ব্যয়</button>
-        <button class="nav-btn" onclick="openAddForm()">সিডিউল এড</button>
+    <div id="finance-form" class="overlay">
+        <h3>💰 আয় ও ব্যয় এন্ট্রি</h3>
+        <label>ধরন:</label>
+        <select id="finType">
+            <option value="Income">আয় (ভাড়া)</option>
+            <option value="Expense">ব্যয় (খরচ)</option>
+        </select>
+        <input type="number" id="finAmount" placeholder="টাকার পরিমাণ">
+        <input type="text" id="finNote" placeholder="বিস্তারিত নোট">
+        <button class="save-btn" onclick="saveFinance()">সেভ করুন</button>
+        <button class="save-btn" style="background:#666" onclick="hideForms()">বন্ধ করুন</button>
     </div>
 
-    <div id="add-form-overlay">
-        <h3>নতুন বুকিং এন্ট্রি</h3>
-        
-        <div class="form-group">
-            <label>তারিখ সিলেক্ট করুন:</label>
-            <input type="date" id="bookDate" onchange="updateDay()">
+    <div id="schedule-form" class="overlay">
+        <h3>📅 নতুন বুকিং</h3>
+        <input type="date" id="bookDate" onchange="updateDay()">
+        <input type="text" id="bookDay" readonly placeholder="বার (অটো)">
+        <div style="display:flex; gap:5px;">
+            <select id="hour"></select><select id="min"></select>
+            <select id="ampm"><option>AM</option><option>PM</option></select>
         </div>
-        <div class="form-group">
-            <label>বার:</label>
-            <input type="text" id="bookDay" readonly placeholder="অটোমেটিক বার আসবে">
-        </div>
-
-        <div class="form-group">
-            <label>সময় (ঘণ্টা : মিনিট : AM/PM):</label>
-            <div class="time-picker">
-                <select id="hour">
-                    <option value="">ঘণ্টা</option>
-                    </select>
-                <select id="minute">
-                    <option value="">মিনিট</option>
-                    </select>
-                <select id="ampm">
-                    <option value="AM">AM</option>
-                    <option value="PM">PM</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>গন্তব্য:</label>
-            <input type="text" id="bookRoute" placeholder="উদা: ঢাকা - খুলনা">
-        </div>
-
-        <div class="form-group">
-            <label>যাত্রীর মোবাইল নম্বর:</label>
-            <input type="number" id="passengerPhone" placeholder="মোবাইল নম্বর">
-        </div>
-
-        <div class="form-group">
-            <label>এডভান্স টাকা:</label>
-            <input type="number" id="advanceAmount" placeholder="৳ পরিমাণ">
-        </div>
-
-        <button class="save-btn" id="finalSaveBtn" onclick="submitSchedule()">সেভ করুন</button>
-        <button class="save-btn close-btn" onclick="closeAddForm()">বন্ধ করুন</button>
+        <input type="text" id="route" placeholder="গন্তব্য (কোথা থেকে - কোথায়)">
+        <input type="number" id="phone" placeholder="যাত্রীর মোবাইল">
+        <input type="number" id="advance" placeholder="এডভান্স (৳)">
+        <button class="save-btn" onclick="saveSchedule()">সেভ বুকিং</button>
+        <button class="save-btn" style="background:#666" onclick="hideForms()">বন্ধ করুন</button>
     </div>
 
     <script>
-        const scriptURL = 'আপনার_গুগল_স্ক্রিপ্ট_লিঙ্ক_এখানে';
+        const scriptURL = 'আপনার_নতুন_URL_এখানে';
 
-        // ঘণ্টা ও মিনিট ড্রপডাউন তৈরি
         window.onload = function() {
             const h = document.getElementById('hour');
-            const m = document.getElementById('minute');
-            for(let i=1; i<=12; i++) h.innerHTML += `<option value="${i}">${i}</option>`;
-            for(let i=0; i<=59; i++) m.innerHTML += `<option value="${i<10?'0'+i:i}">${i<10?'0'+i:i}</option>`;
-            loadSchedules();
+            const m = document.getElementById('min');
+            for(let i=1; i<=12; i++) h.innerHTML += `<option>${i}</option>`;
+            for(let i=0; i<=59; i++) m.innerHTML += `<option>${i<10?'0'+i:i}</option>`;
+            loadData();
         };
 
-        function openAddForm() {
-            document.getElementById('add-form-overlay').style.display = 'block';
-        }
+        function showForm(id) { document.getElementById(id).style.display = 'block'; }
+        function hideForms() { document.querySelectorAll('.overlay').forEach(f => f.style.display = 'none'); }
 
-        function closeAddForm() {
-            document.getElementById('add-form-overlay').style.display = 'none';
-        }
-
-        // তারিখ থেকে বার বের করা
         function updateDay() {
-            const dateVal = document.getElementById('bookDate').value;
-            if(!dateVal) return;
-            const days = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
-            const d = new Date(dateVal);
+            const d = new Date(document.getElementById('bookDate').value);
+            const days = ['রোববার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
             document.getElementById('bookDay').value = days[d.getDay()];
         }
 
-        async function loadSchedules() {
-            const listContainer = document.getElementById('scheduleList');
+        async function loadData() {
             try {
-                const response = await fetch(scriptURL);
-                const data = await response.json();
-                listContainer.innerHTML = '';
-                
+                const res = await fetch(scriptURL);
+                const data = await res.json();
+                const list = document.getElementById('scheduleList');
+                list.innerHTML = '';
                 data.forEach(item => {
-                    // যদি Status 'Paid' হয় তবে সবুজ, নাহলে লাল
-                    const colorClass = item.status === 'Paid' ? 'bg-green' : 'bg-red';
-                    const row = document.createElement('div');
-                    row.className = `booking-row ${colorClass}`;
-                    row.innerHTML = `
-                        <span>${item.day}</span>
-                        <span>${item.date}</span>
-                        <span>${item.time}</span>
-                        <span>${item.route}</span>
-                        <span>${item.phone}</span>
-                    `;
-                    listContainer.appendChild(row);
+                    const color = item.status === 'Paid' ? 'bg-green' : 'bg-red';
+                    list.innerHTML += `<div class="booking-row ${color}">
+                        <span>${item.day}</span><span>${item.date}</span><span>${item.time}</span><span>${item.route}</span><span>${item.phone}</span>
+                    </div>`;
                 });
-            } catch (e) {
-                listContainer.innerHTML = '<p>ডাটা পাওয়া যায়নি</p>';
-            }
+            } catch(e) { document.getElementById('scheduleList').innerHTML = 'ডাটা লোড হয়নি।'; }
         }
 
-        async function submitSchedule() {
-            const btn = document.getElementById('finalSaveBtn');
-            const phone = document.getElementById('passengerPhone').value;
-            const advance = document.getElementById('advanceAmount').value;
-            const hour = document.getElementById('hour').value;
-            const min = document.getElementById('minute').value;
-            const ampm = document.getElementById('ampm').value;
-
-            if(!phone || !hour || !min) { alert("সবগুলো তথ্য সঠিকভাবে পূরণ করুন!"); return; }
-
-            btn.disabled = true;
-            btn.innerText = "সেভ হচ্ছে...";
-
+        async function saveFinance() {
             const data = {
+                action: "save_finance",
+                type: document.getElementById('finType').value,
+                amount: document.getElementById('finAmount').value,
+                note: document.getElementById('finNote').value
+            };
+            await send(data);
+        }
+
+        async function saveSchedule() {
+            const data = {
+                action: "save_schedule",
                 day: document.getElementById('bookDay').value,
                 date: document.getElementById('bookDate').value,
-                time: `${hour}:${min} ${ampm}`,
-                route: document.getElementById('bookRoute').value,
-                phone: phone,
-                advance: advance, // এটি আয়ের হিসাবে যাবে
-                status: 'Booked'
+                time: document.getElementById('hour').value + ":" + document.getElementById('min').value + " " + document.getElementById('ampm').value,
+                route: document.getElementById('route').value,
+                phone: document.getElementById('phone').value,
+                advance: document.getElementById('advance').value
             };
+            await send(data);
+        }
 
-            try {
-                await fetch(scriptURL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(data)
-                });
-                alert("বুকিং এবং এডভান্স সেভ হয়েছে!");
-                closeAddForm();
-                loadSchedules();
-            } catch (e) {
-                alert("ভুল হয়েছে!");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "সেভ করুন";
-            }
+        async function send(data) {
+            await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+            alert("সফলভাবে সেভ হয়েছে!");
+            location.reload();
         }
     </script>
 </body>
