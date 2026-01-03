@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rent-a-Car Manager</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 15px; color: #333; }
+        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .stats { display: flex; justify-content: space-between; }
+        .stat-box { text-align: center; flex: 1; }
+        .income { color: #27ae60; font-size: 20px; font-weight: bold; }
+        .outgoing { color: #e74c3c; font-size: 20px; font-weight: bold; }
+        h3 { margin: 0 0 10px 0; font-size: 16px; color: #7f8c8d; }
+        .btn { background: #0088cc; color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .transaction-list { font-size: 14px; border-top: 1px solid #eee; padding-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h3>মোট হিসাব (Profit/Loss)</h3>
+        <div class="stats">
+            <div class="stat-box">
+                <h3>Income</h3>
+                <div class="income">৳ <span id="totalIncome">0</span></div>
+            </div>
+            <div class="stat-box">
+                <h3>Outgoing</h3>
+                <div class="outgoing">৳ <span id="totalOutgoing">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>নতুন এন্ট্রি যোগ করুন</h3>
+        <select id="type">
+            <option value="income">Income (ভাড়া পাওয়া গেছে)</option>
+            <option value="outgoing">Outgoing (খরচ হয়েছে)</option>
+        </select>
+        <input type="number" id="amount" placeholder="টাকার পরিমাণ (Amount)">
+        <input type="text" id="note" placeholder="বিস্তারিত (যেমন: তেলের খরচ)">
+        <button class="btn" onclick="saveData()">Save Entry</button>
+    </div>
+
+    <div class="card">
+        <h3>সাম্প্রতিক লেনদেন</h3>
+        <div id="history" class="transaction-list">কোন ডাটা নেই।</div>
+    </div>
+
+    <script>
+        // Telegram WebApp Initialization
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let incomeTotal = 0;
+        let outgoingTotal = 0;
+
+        function saveData() {
+            const type = document.getElementById('type').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const note = document.getElementById('note').value;
+
+            if(!amount || amount <= 0) { alert("সঠিক পরিমাণ দিন"); return; }
+
+            if(type === 'income') incomeTotal += amount;
+            else outgoingTotal += amount;
+
+            updateUI();
+            
+            // এখানে পরে আমরা Google Sheets এ ডাটা পাঠানোর কোড যোগ করব
+            alert("ডাটা সেভ হয়েছে!");
+            document.getElementById('amount').value = '';
+            document.getElementById('note').value = '';
+        }
+
+        function updateUI() {
+            document.getElementById('totalIncome').innerText = incomeTotal;
+            document.getElementById('totalOutgoing').innerText = outgoingTotal;
+            const history = document.getElementById('history');
+            history.innerHTML = "সর্বশেষ এন্ট্রি যোগ করা হয়েছে।";
+        }
+    </script>
+</body>
+</html>
