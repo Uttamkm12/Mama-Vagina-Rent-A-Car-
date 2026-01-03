@@ -3,95 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mama Vagina Rent-A-Car</title>
+    <title>Rent-A-Car Manager & Schedule</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #eef2f3; margin: 0; padding: 15px; color: #333; }
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        h3 { margin-top: 0; color: #0088cc; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .btn { background: #0088cc; color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
-        .btn:active { background: #006699; transform: scale(0.98); }
-        .btn:disabled { background: #ccc; cursor: not-allowed; }
-        label { font-weight: bold; display: block; margin-top: 10px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        .status { text-align: center; color: #27ae60; font-weight: bold; margin-top: 15px; display: none; padding: 10px; background: #dff0d8; border-radius: 5px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #eef2f3; margin: 0; padding: 10px; }
+        .tabs { display: flex; margin-bottom: 15px; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: none; font-weight: bold; cursor: pointer; color: #777; }
+        .tab-btn.active { background: #0088cc; color: #fff; }
+        
+        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 15px; display: none; }
+        .card.active { display: block; }
+        
+        .btn { background: #0088cc; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        input, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+
+        /* Schedule Grid Styling */
+        .schedule-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+        .slot { padding: 15px; border-radius: 10px; text-align: center; color: white; font-weight: bold; cursor: pointer; position: relative; }
+        .available { background: #27ae60; } /* সবুজ - খালি */
+        .booked { background: #e74c3c; }    /* লাল - বুকিং */
+        
+        .details { font-size: 11px; font-weight: normal; margin-top: 5px; display: block; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h3>🚗 রেন্ট-এ-কার ম্যানেজার</h3>
-        
-        <label>লেনদেনের ধরন:</label>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('accounts')">হিসাব (Accounts)</button>
+        <button class="tab-btn" onclick="openTab('schedule')">সিডিউল (Schedule)</button>
+    </div>
+
+    <div id="accounts" class="card active">
+        <h3>💰 আয়-ব্যয়ের হিসাব</h3>
         <select id="type">
-            <option value="Income">আয় (ভাড়া পাওয়া গেছে 💰)</option>
-            <option value="Expense">ব্যয় (খরচ হয়েছে 💸)</option>
+            <option value="Income">আয় (ভাড়া পাওয়া গেছে)</option>
+            <option value="Expense">ব্যয় (খরচ হয়েছে)</option>
         </select>
+        <input type="number" id="amount" placeholder="টাকার পরিমাণ (৳)">
+        <input type="text" id="note" placeholder="বিস্তারিত নোট">
+        <button class="btn" onclick="saveData()">সেভ করুন</button>
+    </div>
 
-        <label>টাকার পরিমাণ:</label>
-        <input type="number" id="amount" placeholder="৳ ০.০০" inputmode="decimal">
+    <div id="schedule" class="card">
+        <h3>📅 গাড়ির সিডিউল (আজ)</h3>
+        <div class="schedule-grid">
+            <div class="slot available" onclick="alert('এই সময়টি খালি আছে।')">
+                সকাল ৮:০০ - ১০:০০
+                <span class="details">অবস্থা: খালি</span>
+            </div>
+            
+            <div class="slot booked" onclick="alert('রুট: ঢাকা থেকে কুমিল্লা\nসময়: সকাল ১১:০০\nড্রাইভার: রহিম')">
+                সকাল ১০:০০ - ১২:০০
+                <span class="details">গন্তব্য: কুমিল্লা (বুকড)</span>
+            </div>
 
-        <label>বিস্তারিত নোট:</label>
-        <input type="text" id="note" placeholder="যেমন: তেলের খরচ বা কাস্টমারের নাম">
+            <div class="slot available" onclick="alert('এই সময়টি খালি আছে।')">
+                দুপুর ১২:০০ - ২:০০
+                <span class="details">অবস্থা: খালি</span>
+            </div>
 
-        <button class="btn" id="saveBtn" onclick="saveData()">সেভ করুন</button>
-        <div id="statusMsg" class="status">সফলভাবে গুগল শিটে সেভ হয়েছে! ✅</div>
+            <div class="slot booked" onclick="alert('রুট: এয়ারপোর্ট ড্রপ\nসময়: বিকাল ৩:৩০\nযাত্রী: জনাব হক')">
+                বিকাল ৩:০০ - ৫:০০
+                <span class="details">গন্তব্য: এয়ারপোর্ট (বুকড)</span>
+            </div>
+        </div>
+        <p style="font-size: 12px; color: #666; margin-top: 15px;">* লাল ঘরে চাপ দিলে বিস্তারিত দেখা যাবে।</p>
     </div>
 
     <script>
-        // আপনার লেটেস্ট গুগল স্ক্রিপ্ট লিঙ্ক
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbzOVlsr3wfydx3XeBWg-dz3PwQOgoY_jYyk6Y2FYEYYc3BCZa-pLxRKxpGuRuhLI3r2/exec';
+        const scriptURL = 'আপনার_লিঙ্ক_এখানে'; // আপনার Google Script লিঙ্কটি এখানে বসান
 
-        let tg = window.Telegram.WebApp;
-        tg.expand();
+        function openTab(tabName) {
+            document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
 
         async function saveData() {
-            const btn = document.getElementById('saveBtn');
-            const msg = document.getElementById('statusMsg');
-            const amount = document.getElementById('amount').value;
-            const type = document.getElementById('type').value;
-            const note = document.getElementById('note').value;
-
-            if(!amount || amount <= 0) {
-                alert("দয়া করে সঠিক টাকার পরিমাণ লিখুন।");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "সেভিং... দয়া করে অপেক্ষা করুন";
-
-            const data = {
-                type: type,
-                amount: amount,
-                note: note
-            };
-
-            try {
-                // ডাটা পাঠানোর অংশ
-                await fetch(scriptURL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    cache: 'no-cache',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                // সফল হলে মেসেজ দেখাবে
-                msg.style.display = 'block';
-                document.getElementById('amount').value = '';
-                document.getElementById('note').value = '';
-                
-                setTimeout(() => {
-                    msg.style.display = 'none';
-                }, 4000);
-
-            } catch (error) {
-                console.error('Error!', error.message);
-                alert("দুঃখিত, ডাটা সেভ হয়নি। আবার চেষ্টা করুন।");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "সেভ করুন";
-            }
+            // ... (আগের সেভ ডাটা কোড এখানে থাকবে)
+            alert("ডাটা প্রসেসিং হচ্ছে...");
         }
     </script>
 </body>
