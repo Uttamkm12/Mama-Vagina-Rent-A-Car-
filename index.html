@@ -3,86 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rent-A-Car Manager & Schedule</title>
+    <title>Mama Vagina Car Manager</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #eef2f3; margin: 0; padding: 10px; }
         .tabs { display: flex; margin-bottom: 15px; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .tab-btn { flex: 1; padding: 12px; border: none; background: none; font-weight: bold; cursor: pointer; color: #777; }
         .tab-btn.active { background: #0088cc; color: #fff; }
-        
-        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 15px; display: none; }
+        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none; }
         .card.active { display: block; }
-        
-        .btn { background: #0088cc; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        input, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-
-        /* Schedule Grid Styling */
-        .schedule-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
-        .slot { padding: 15px; border-radius: 10px; text-align: center; color: white; font-weight: bold; cursor: pointer; position: relative; }
-        .available { background: #27ae60; } /* সবুজ - খালি */
-        .booked { background: #e74c3c; }    /* লাল - বুকিং */
-        
-        .details { font-size: 11px; font-weight: normal; margin-top: 5px; display: block; }
+        .slot { padding: 15px; border-radius: 10px; text-align: center; color: white; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        .available { background: #27ae60; } /* সবুজ */
+        .booked { background: #e74c3c; }    /* লাল */
+        .details-text { font-size: 11px; font-weight: normal; display: block; margin-top: 5px; }
+        input, select, .btn { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+        .btn { background: #0088cc; color: white; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="openTab('accounts')">হিসাব (Accounts)</button>
-        <button class="tab-btn" onclick="openTab('schedule')">সিডিউল (Schedule)</button>
+        <button class="tab-btn active" onclick="openTab('accounts')">হিসাব</button>
+        <button class="tab-btn" onclick="openTab('schedule')">সিডিউল</button>
     </div>
 
     <div id="accounts" class="card active">
-        <h3>💰 আয়-ব্যয়ের হিসাব</h3>
-        <select id="type">
-            <option value="Income">আয় (ভাড়া পাওয়া গেছে)</option>
-            <option value="Expense">ব্যয় (খরচ হয়েছে)</option>
-        </select>
-        <input type="number" id="amount" placeholder="টাকার পরিমাণ (৳)">
-        <input type="text" id="note" placeholder="বিস্তারিত নোট">
+        <h3>💰 আয়-ব্যয় যোগ করুন</h3>
+        <select id="type"><option value="Income">আয়</option><option value="Expense">ব্যয়</option></select>
+        <input type="number" id="amount" placeholder="৳ পরিমাণ">
+        <input type="text" id="note" placeholder="বিস্তারিত">
         <button class="btn" onclick="saveData()">সেভ করুন</button>
     </div>
 
     <div id="schedule" class="card">
-        <h3>📅 গাড়ির সিডিউল (আজ)</h3>
-        <div class="schedule-grid">
-            <div class="slot available" onclick="alert('এই সময়টি খালি আছে।')">
-                সকাল ৮:০০ - ১০:০০
-                <span class="details">অবস্থা: খালি</span>
-            </div>
-            
-            <div class="slot booked" onclick="alert('রুট: ঢাকা থেকে কুমিল্লা\nসময়: সকাল ১১:০০\nড্রাইভার: রহিম')">
-                সকাল ১০:০০ - ১২:০০
-                <span class="details">গন্তব্য: কুমিল্লা (বুকড)</span>
-            </div>
-
-            <div class="slot available" onclick="alert('এই সময়টি খালি আছে।')">
-                দুপুর ১২:০০ - ২:০০
-                <span class="details">অবস্থা: খালি</span>
-            </div>
-
-            <div class="slot booked" onclick="alert('রুট: এয়ারপোর্ট ড্রপ\nসময়: বিকাল ৩:৩০\nযাত্রী: জনাব হক')">
-                বিকাল ৩:০০ - ৫:০০
-                <span class="details">গন্তব্য: এয়ারপোর্ট (বুকড)</span>
-            </div>
-        </div>
-        <p style="font-size: 12px; color: #666; margin-top: 15px;">* লাল ঘরে চাপ দিলে বিস্তারিত দেখা যাবে।</p>
+        <h3>📅 আজকের গাড়ির অবস্থা</h3>
+        <div id="schedule-list">লোডিং...</div>
     </div>
 
     <script>
-        const scriptURL = 'আপনার_লিঙ্ক_এখানে'; // আপনার Google Script লিঙ্কটি এখানে বসান
+        const scriptURL = 'আপনার_নতুন_লিঙ্ক_এখানে'; // আপনার নতুন Deploy করা লিঙ্কটি দিন
 
         function openTab(tabName) {
-            document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(tabName).classList.add('active');
             event.currentTarget.classList.add('active');
+            if(tabName === 'schedule') loadSchedule();
+        }
+
+        async function loadSchedule() {
+            const list = document.getElementById('schedule-list');
+            try {
+                const response = await fetch(scriptURL);
+                const data = await response.json();
+                list.innerHTML = '';
+                data.forEach(item => {
+                    const statusClass = item.status.toLowerCase() === 'available' ? 'available' : 'booked';
+                    const div = document.createElement('div');
+                    div.className = `slot ${statusClass}`;
+                    div.onclick = () => alert(`রুট: ${item.route}\nবিস্তারিত: ${item.details}`);
+                    div.innerHTML = `${item.time} <span class="details-text">${item.route || item.status}</span>`;
+                    list.appendChild(div);
+                });
+            } catch (e) { list.innerHTML = 'ডাটা লোড করতে সমস্যা হয়েছে।'; }
         }
 
         async function saveData() {
-            // ... (আগের সেভ ডাটা কোড এখানে থাকবে)
-            alert("ডাটা প্রসেসিং হচ্ছে...");
+            // ... ডাটা সেভ করার fetch কোড ...
+            alert("সেভ হচ্ছে...");
         }
     </script>
 </body>
